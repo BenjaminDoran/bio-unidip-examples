@@ -3,6 +3,11 @@ import random
 from itertools import chain
 import numpy as np
 
+
+##
+## Calc information content, entropy, and ecdfs ##
+##
+
 def ecdf(x):
     """ Return CDF of array """
     return np.arange(len(x))/float(len(x))
@@ -27,33 +32,48 @@ def shannonEntropy(cnts, is_probs=False, minval=None):
     # entropy calc
     return -np.sum(np.apply_along_axis(lambda p: p * np.log2(p), 0, dat))
 
-def genStrs(pattern, times, length, number): 
-    """ Generate Interspersed Motif and Noise 
-        INPUT: 
-            pattern (str), motif to insert
-            times (int), number of times to insert motif
-            length (int), length of noise regions
-            number (int), number of samples to generate
-            
-        RETURNS: list of strings
-    """
-    ileave = lambda *iters: list(chain(*zip(*iters)))
-    genNoise = lambda n: "".join(random.choices("ACGT", k=n))
-    strGen = lambda p, t, nl: "".join([genNoise(nl)] + ileave([p for i in range(t)], [genNoise(nl) for i in range(t)]))
-    
-    return [strGen(pattern, times, length) for i in range(number)]
+##
+## Mutate and insert string motifs ##
+##
 
-def genMutStrs(pattern="AAAAAAAAAAAAAAA", mut_num=0, insert_num=1, noise_len=50, noise_var=0, number=20):
-    ileave = lambda *iters: list(chain(*zip(*iters)))
-    genNoise = lambda n: "".join(random.choices("ACGT", k=n))
-    mutate1 = lambda s, i: s[:i] + genNoise(1) + s[i+1:]
-    def mutateN(s, n): 
-        for i in [random.randint(0, len(s)-1) for x in range(n)]:
-            s = mutate1(s, i) 
-        return s
-    def strGen(p, mn, inum, nl, nv): 
-        return "".join([genNoise(nl + random.randint(0, nv))] 
-                       + ileave([mutateN(p, mn) for i in range(inum)],
-                                [genNoise(nl + random.randint(0, nv)) for i in range(inum)]))
+gen_noise = lambda n: "".join(random.choices("ACGT", k=n))
+
+mutate1 = lambda s, i: s[:i] + gen_noise(1) + s[i+1:]
+
+def mutate_n(s, n): 
+    for i in [random.randint(0, len(s)-1) for x in range(n)]:
+        s = mutate1(s, i) 
+    return s
+
+def insert_s(s, i, ins):
+    return s[:i] + ins + s[i+1:]
+
+def insert_n(s, n, ins, **kwargs):
+    ls = len(s)
+    Lins = len(ins)
+    min_offset = ((ls//n)//2) if kwargs.get("min_offset") == None else kwargs.get("min_offset")
+    max_offset = min_offset if kwargs.get("max_offset") == None else  kwargs.get("max_offset")
+    min_gap = ls//n if kwargs.get("min_gap") == None else kwargs.get("min_gap") 
+    max_gap = min_gap if kwargs.get("max_gap") == None else kwargs.get("max_gap") 
+    assert min_gap <= max_gap, f"min_gap must be less than max_gap {min_gap} !<= {max_gap}"
+    mutate_num = 0 if kwargs.get("mutate_num") == None else kwargs.get("mutate_num")
     
-    return [strGen(pattern, mut_num, insert_num, noise_len, noise_var) for i in range(number)]
+    idxs = []
+    for i in range(n):
+        idxs.append(random.randint(min_offset, max_offset) + i * (Lins + random.randint(min_gap, max_gap)))
+        s = insert_s(s, idxs[-1], mutate_n(ins, mutate_num))
+
+    return idxs, s
+
+def gen_mut_strs(motif="AAAAAAAAAAAAAAAA", insert_num=1, Nstrs=50, str_len=100, **kwargs):
+    noise_len = str_len - ((len(motif) -1) * insert_num)
+    strs = [insert_n(gen_noise(noise_len), insert_num, motif, **kwargs) for i in range(Nstrs)]
+    idxs, strs = zip(*strs)
+    return idxs, strs
+
+def score(res, nent):
+    scores = {}
+    for i in res:
+        scores[f"cluster{len(scores)+1}"] = sum(nent.iloc[i[0]:i[1]]) / (i[1] - i[0])
+        print(f"Cluster {len(scores)} mean conservation", scores[f"cluster{len(scores)}"])
+    return scores

@@ -1,2 +1,13 @@
+# temp python files
 .ipynb_checkpoints/
 __pycache__/
+
+# fasta folders
+tmp/
+fastafiles/
+
+# output folders
+MA0852_2/
+
+# MUSCLE
+muscle3.8.31_i86linux64
