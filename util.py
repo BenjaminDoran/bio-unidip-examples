@@ -12,6 +12,13 @@ def ecdf(x):
     """ Return CDF of array """
     return np.arange(len(x))/float(len(x))
 
+def plot_ecdf(a):
+    """ Return plot of CDF by sorted xvals """
+    import matplotlib.pyplot as plt 
+    sorted_ = np.sort(a)
+    yvals = np.arange(len(sorted_))/float(len(sorted_))
+    return plt.plot(sorted_, yvals)
+
 def getInfoCntnt(cnts, is_probs=False, minval=None):
     """ Get Information Content"""
     if not is_probs:
@@ -31,6 +38,7 @@ def shannonEntropy(cnts, is_probs=False, minval=None):
     dat[dat == 0] = minval or (1 / (10 * len(dat)))
     # entropy calc
     return -np.sum(np.apply_along_axis(lambda p: p * np.log2(p), 0, dat))
+
 
 ##
 ## Mutate and insert string motifs ##
@@ -65,7 +73,7 @@ def insert_n(s, n, ins, **kwargs):
 
     return idxs, s
 
-def gen_mut_strs(motif="AAAAAAAAAAAAAAAA", insert_num=1, Nstrs=50, str_len=100, **kwargs):
+def gen_mut_strs(motif="AAAAAAAAAAAAAAAA", insert_num=1, n_strs=50, str_len=100, **kwargs):
     noise_len = str_len - ((len(motif) -1) * insert_num)
     strs = [insert_n(gen_noise(noise_len), insert_num, motif, **kwargs) for i in range(Nstrs)]
     idxs, strs = zip(*strs)

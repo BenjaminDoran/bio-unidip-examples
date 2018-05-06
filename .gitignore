@@ -3,7 +3,7 @@
 __pycache__/
 
 # fasta folders
-tmp/
+humanGenome/
 fastafiles/
 
 # output folders
