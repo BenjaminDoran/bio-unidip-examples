@@ -1,16 +1,18 @@
-# BioDip Testing Examples
+# UniDip Testing Examples
+
+This repository archives the suplementary materials for the paper "Unimodality Based Clustering Applied to Biological Motif Discovery." The paper may be viewed at the following link [here](https://github.com/BenjaminDoran/motif-paper). 
 
 ## Cloning Repo
 
 ```
-git clone <repo url>
+git clone https://github.com/BenjaminDoran/bio-unidip-examples.git
 git submodule init
 git submodule update
 ```
 
 ## Setup
 
-### PYTHON 
+#### Python 
 
 We recommend using the Anaconda 3.6 version of Python with these packages:
 
@@ -20,12 +22,12 @@ Pandas
 Matplotlib
 
 
-### MUSCLE
+#### MUSCLE
 
 Go to https://www.drive5.com/muscle/
 to download the MUSCLE alignment tool for your platform. unzip the folder and place the executable in the base folder of this repo. All notebooks that use MUSCLE have a variable that holds the path to the executable.
 
-### MEME
+#### MEME
 
 `runmeme.sh`  starts and runs a docker conatiner with meme installed. The file also contains an example command on how to run MEME on the raw sequences. Adjust the input file and output folder to run on trimmed sequences.
 
